@@ -1,0 +1,142 @@
+body {
+    font-family: 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+}
+
+.navbar-custom {
+    background-color: #001c64;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand img {
+    height: 32px;
+}
+
+.btn-signup {
+    background-color: #4b60ff;
+    color: white;
+    border-radius: 20px;
+    padding: 6px 20px;
+}
+
+.hero-section {
+    padding: 60px 15px;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    color: #001c64;
+    font-weight: 700;
+}
+
+.hero-subtext {
+    color: #444;
+    font-size: 1.1rem;
+    margin-top: 15px;
+    line-height: 1.6;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    animation: float 3s ease-in-out infinite;
+}
+
+
+/* Float animation */
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.btn-create,
+.btn-login-custom {
+    border-radius: 30px;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    margin-top: 20px;
+}
+
+.btn-create {
+    background-color: #0033cc;
+    color: #fff;
+    border: none;
+}
+
+.btn-create:hover {
+    background-color: #002bb5;
+}
+
+.btn-login-custom {
+    background-color: transparent;
+    color: #0033cc;
+    border: 2px solid #0033cc;
+}
+
+.btn-login-custom:hover {
+    background-color: #e6e9ff;
+}
+
+.section-title {
+    font-size: 2rem;
+    color: #001c64;
+    font-weight: 700;
+    margin-top: 60px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.section-text {
+    font-size: 1.1rem;
+    color: #444;
+    text-align: center;
+    max-width: 800px;
+    margin: auto;
+    line-height: 1.6;
+}
+
+.features-section {
+    margin-top: 60px;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    color: #4b60ff;
+    margin-bottom: 15px;
+}
+
+.feature-title {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.feature-description {
+    color: #666;
+    font-size: 1rem;
+    padding: 0 20px;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    .btn-create,
+    .btn-login-custom {
+        padding: 10px 28px;
+        font-size: 1rem;
+    }
+}

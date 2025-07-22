@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login / Signup Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
+        <div class="text-center">
+            <h1 class="text-2xl font-bold" id="form-title">Login</h1>
+            <p class="text-sm text-gray-500" id="form-subtext">Welcome back! Please enter your credentials.</p>
+        </div>
+
+        <!-- Login / Signup Form -->
+        <form id="auth-form" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" required class="mt-1 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300" />
+            </div>
+            <div id="extra-field" class="hidden">
+                <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <input type="password" class="mt-1 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring focus:ring-blue-300" />
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition">Submit</button>
+        </form>
+
+        <div class="text-center text-sm text-gray-600">
+            <span id="toggle-text">Don't have an account?</span>
+            <button id="toggle-btn" class="text-blue-600 hover:underline">Sign Up</button>
+        </div>
+    </div>
+
+    <script>
+        const title = document.getElementById('form-title');
+        const subtext = document.getElementById('form-subtext');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const extraField = document.getElementById('extra-field');
+
+        let isSignup = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isSignup = !isSignup;
+            title.textContent = isSignup ? 'Sign Up' : 'Login';
+            subtext.textContent = isSignup ? 'Create a new account below.' : 'Welcome back! Please enter your credentials.';
+            toggleText.textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+            toggleBtn.textContent = isSignup ? 'Login' : 'Sign Up';
+            extraField.classList.toggle('hidden', !isSignup);
+        });
+    </script>
+</body>
+
+</html>

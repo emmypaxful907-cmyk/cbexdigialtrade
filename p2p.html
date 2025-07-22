@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bitcoin Offers - M-Pesa Only</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 p-6 flex flex-col min-h-screen">
+    <div class="max-w-6xl mx-auto flex-grow">
+
+        <!-- Wallet Info -->
+        <div class="bg-white shadow-sm p-4 mb-6 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="text-lg font-semibold mb-1">BTC Wallet</h3>
+                <p class="text-sm text-gray-700">Address: <span class="font-mono text-blue-600">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span></p>
+                <p class="text-sm text-gray-700">Balance: <span class="font-semibold text-green-700" id="btc-balance">0.000 BTC</span></p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-1">USDT Wallet</h3>
+                <p class="text-sm text-gray-700">Address: <span class="font-mono text-blue-600">0x3f5CE5FBFe3E9af3971dD833D26BA9b5C936f0bE</span></p>
+                <p class="text-sm text-gray-700">Balance: <span class="font-semibold text-green-700" id="usdt-balance">0.00 USDT</span></p>
+            </div>
+        </div>
+
+        <!-- Conversion and Withdrawal -->
+        <div class="mb-6 space-x-4">
+            <button onclick="convertBTCtoUSDT()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md">Convert BTC to USDT</button>
+            <button onclick="convertUSDTtoBTC()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-md">Convert USDT to BTC</button>
+            <button onclick="openWithdrawModal()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">Withdraw</button>
+            <span id="conversion-result" class="ml-4 text-sm text-gray-700"></span>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-4">Bitcoin Offers (M-Pesa Only)</h2>
+        <p class="mb-6 text-gray-600">Buy or sell Bitcoin using M-Pesa only.</p>
+
+        <!-- Offer Type Toggle -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="setOfferType('buy')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md">Buy</button>
+            <button onclick="setOfferType('sell')" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">Sell</button>
+        </div>
+
+        <!-- Sort Button -->
+        <div class="flex flex-wrap items-center gap-4 mb-6">
+            <button onclick="sortOffers()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+        Sort by Price
+      </button>
+        </div>
+
+        <!-- Offers List -->
+        <div id="offersList" class="space-y-4"></div>
+    </div>
+
+    <!-- Sell Warning Modal -->
+    <div id="sellModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md text-center">
+            <p class="text-red-600 text-lg font-semibold mb-4">You have insufficient crypto to sell.</p>
+            <button onclick="closeSellModal()" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Close</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4">Withdraw Funds</h3>
+            <label class="block mb-2">Select Crypto:</label>
+            <select id="withdraw-crypto" class="w-full mb-4 px-3 py-2 border rounded">
+        <option value="BTC">BTC</option>
+        <option value="USDT">USDT</option>
+      </select>
+            <label class="block mb-2">Amount:</label>
+            <input type="number" id="withdraw-amount" class="w-full mb-4 px-3 py-2 border rounded" placeholder="Enter amount">
+            <label class="block mb-2">Destination Wallet Address:</label>
+            <input type="text" id="withdraw-address" class="w-full mb-4 px-3 py-2 border rounded" placeholder="Enter wallet address">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeWithdrawModal()" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md">Cancel</button>
+                <button onclick="submitWithdrawal()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white text-center text-sm text-gray-600 mt-10 py-4 shadow-inner">
+        &copy; 2025 Bitcoin Offers. All rights reserved.
+    </footer>
+
+    <!-- Script -->
+    <script>
+        const buyUsers = ["Liam Hartley", "Amara Velasquez", "Noah Kimani", "Sophie Andersson", "Elijah Nakamura", "Mila D’Souza", "Aiden Chen", "Zara Mwangi", "Ethan Kiplagat", "Leila Fernandez", "Mateo Sullivan", "Nyla Juma", "Caleb Odhiambo", "Isla Petrova", "Daniel Njoroge", "Hana Abebe", "Owen Mutiso", "Layla Hussain", "Jayden Kiprono", "Talia Rosenberg"];
+        const sellUsers = ["Harper Ellington", "Silas Drummond", "Tessa Hawthorne", "Milo Carrington", "Aurora Bellamy", "Declan Rhodes", "Isla Kensington", "Beckett Voss", "Freya Larkspur", "Camden Ashford", "Juniper Sloan", "Wyatt Ellery", "Dahlia Prescott", "Orion Blake", "Maisie Whitaker", "Emmett Rowe", "Bianca Sterling", "Finn Montgomery", "Lydia Hartwell", "Rowan Kingsley"];
+
+        const offers = [...buyUsers.map(user => ({
+                user,
+                rating: Math.floor(Math.random() * 200) + 1,
+                seen: 'Online',
+                method: 'M-Pesa',
+                tag: 'Mpesa',
+                speed: 'Instant',
+                price: 80 + Math.floor(Math.random() * 20),
+                min: 'KES 400',
+                max: 'KES 20,000',
+                type: 'buy'
+            })),
+            ...sellUsers.map(user => ({
+                user,
+                rating: Math.floor(Math.random() * 200) + 1,
+                seen: 'Online',
+                method: 'M-Pesa',
+                tag: 'Mpesa',
+                speed: 'Instant',
+                price: 80 + Math.floor(Math.random() * 20),
+                min: 'KES 400',
+                max: 'KES 20,000',
+                type: 'sell'
+            }))
+        ];
+
+        let currentOfferType = 'buy';
+        let sortAsc = true;
+
+        function renderOffers(list) {
+            const container = document.getElementById('offersList');
+            container.innerHTML = list.filter(o => o.type === currentOfferType).map(o => `
+        <div class="grid grid-cols-1 md:grid-cols-5 items-start gap-4 border p-4 rounded-lg shadow-sm bg-white">
+          <div>
+            <div class="font-semibold">${o.user}</div>
+            <div class="text-xs text-gray-500">${o.rating} 👍</div>
+            <div class="text-xs text-green-600">Seen ${o.seen}</div>
+          </div>
+          <div><div class="font-medium">${o.method}</div></div>
+          <div class="hidden md:block text-sm text-gray-500">${o.speed}</div>
+          <div class="hidden md:block text-sm">
+            <div class="font-semibold text-green-700">$${o.price.toFixed(2)} USD</div>
+            <div class="text-xs text-gray-500">Min: ${o.min} / Max: ${o.max}</div>
+          </div>
+          <div class="text-right">
+            <button onclick="handleOfferClick('${o.type}')" class="${o.type === 'buy' ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'} text-white px-4 py-2 rounded-md">
+              ${o.type === 'buy' ? 'Buy' : 'Sell'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        function handleOfferClick(type) {
+            if (type === 'buy') {
+                window.location.href = 'chat.html';
+            } else {
+                document.getElementById('sellModal').classList.remove('hidden');
+            }
+        }
+
+        function closeSellModal() {
+            document.getElementById('sellModal').classList.add('hidden');
+        }
+
+        function sortOffers() {
+            offers.sort((a, b) => sortAsc ? a.price - b.price : b.price - a.price);
+            sortAsc = !sortAsc;
+            renderOffers(offers);
+        }
+
+        function setOfferType(type) {
+            closeSellModal();
+            currentOfferType = type;
+            renderOffers(offers);
+        }
+
+        function convertBTCtoUSDT() {
+            alert("BTC to USDT conversion triggered.");
+        }
+
+        function convertUSDTtoBTC() {
+            alert("USDT to BTC conversion triggered.");
+        }
+
+        function openWithdrawModal() {
+            document.getElementById('withdrawModal').classList.remove('hidden');
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').classList.add('hidden');
+        }
+
+        function submitWithdrawal() {
+            const crypto = document.getElementById('withdraw-crypto').value;
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const address = document.getElementById('withdraw-address').value;
+            const btcBalance = parseFloat(document.getElementById('btc-balance').innerText.replace(' BTC', ''));
+            const usdtBalance = parseFloat(document.getElementById('usdt-balance').innerText.replace(' USDT', ''));
+            if (!amount || !address) return alert("Please fill in all fields.");
+            if ((crypto === 'BTC' && amount > btcBalance) || (crypto === 'USDT' && amount > usdtBalance)) return alert("Insufficient balance for this withdrawal.");
+            alert(`Withdrawal of ${amount} ${crypto} to ${address} submitted.`);
+            closeWithdrawModal();
+        }
+
+        setOfferType('buy');
+    </script>
+</body>
+
+</html>

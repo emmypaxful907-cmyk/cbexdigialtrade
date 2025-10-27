@@ -44,16 +44,28 @@
         const toggleText = document.getElementById('toggle-text');
         const toggleBtn = document.getElementById('toggle-btn');
         const extraField = document.getElementById('extra-field');
+        const form = document.getElementById('auth-form');
 
         let isSignup = false;
 
+        // Toggle between Login and Signup
         toggleBtn.addEventListener('click', () => {
             isSignup = !isSignup;
             title.textContent = isSignup ? 'Sign Up' : 'Login';
-            subtext.textContent = isSignup ? 'Create a new account below.' : 'Welcome back! Please enter your credentials.';
-            toggleText.textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+            subtext.textContent = isSignup ?
+                'Create a new account below.' :
+                'Welcome back! Please enter your credentials.';
+            toggleText.textContent = isSignup ?
+                'Already have an account?' :
+                "Don't have an account?";
             toggleBtn.textContent = isSignup ? 'Login' : 'Sign Up';
             extraField.classList.toggle('hidden', !isSignup);
+        });
+
+        // Redirect when form is submitted
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // prevent real form submission
+            window.location.href = "p2p.html"; // redirect to p2p.login page
         });
     </script>
 </body>
